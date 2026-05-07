@@ -7,7 +7,7 @@
 ```
 eth-scanner/
 ├── chains.js           # 链配置（RPC、chainId、代币符号）
-├── config.env          # 白名单配置文件
+├── config.env          # 配置文件（白名单 + 网络筛选）
 ├── config-loader.js    # 配置加载器
 ├── found-wallet.js     # 发现余额自动保存
 ├── found/              # 发现的钱包存放目录（自动创建，已 gitignore）
@@ -71,6 +71,45 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 --batch-size N       批量模式每批地址数（默认 20）
 ```
 
+## 配置文件 config.env
+
+所有配置集中在一个文件中，编辑 `config.env`：
+
+```
+# 网络筛选 — 留空扫描全部，填入则只扫描指定网络
+CHAINS=eth,bsc,polygon
+
+# 白名单 — 匹配的地址跳过扫描
+WHITELIST=0x1234...abcd,0x5678...ef01
+```
+
+### 网络筛选
+
+`CHAINS` 字段支持部分匹配和别名：
+
+| 配置 | 实际匹配 |
+|------|----------|
+| `eth` | Ethereum, EthereumPoW |
+| `bsc` | BNB Chain |
+| `polygon` | Polygon, Polygon zkEVM |
+| `arb` 或 `arbitrum` | Arbitrum One |
+| `avax` | Avalanche |
+| `matic` | Polygon |
+| `ftm` | Fantom |
+| `ethereum` | 仅 Ethereum 主网 |
+
+留空 `CHAINS=` 则扫描全部 40+ 网络。
+
+命令行 `--chains` 参数优先级高于 config.env，会覆盖配置文件设置。
+
+### 白名单
+
+`WHITELIST` 字段配置需要跳过的地址，多个地址用逗号分隔，不区分大小写。
+
+两个扫描器均支持：
+- `scanner.js` — 显示 "SKIPPED (whitelisted)" 并跳过
+- `batch-scanner.js` — 自动过滤，不发起 RPC 请求
+
 ## 发现余额自动保存
 
 扫描过程中发现有钱包余额的地址，会自动保存到 `found/` 目录：
@@ -81,22 +120,6 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 每次发现新余额会自动追加，不会覆盖历史记录。
 
 保存的信息包括：私钥、地址、助记词（如有）、网络名、币名、Chain ID、余额。
-
-
-## 白名单配置
-
-编辑 `config.env` 文件，添加需要跳过的地址：
-
-```
-# 多个地址用逗号分隔，不区分大小写
-WHITELIST=0x1234...abcd,0x5678...ef01
-```
-
-当扫描过程中生成的随机钱包地址与白名单匹配时，该地址将被跳过，不会查询余额。
-
-两个扫描器均支持白名单功能：
-- `scanner.js` — 显示 "SKIPPED (whitelisted)" 并跳过
-- `batch-scanner.js` — 自动过滤，不发起 RPC 请求
 
 ## 注意事项
 

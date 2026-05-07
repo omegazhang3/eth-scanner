@@ -149,7 +149,8 @@ function getActiveChains() {
   if (config.filterChains) {
     chains = chains.filter(c => {
       const lower = c.name.toLowerCase();
-      return config.filterChains.some(f => lower.includes(f) || lower === f);
+      const aliases = (c.aliases || []).map(a => a.toLowerCase());
+      return config.filterChains.some(f => lower.includes(f) || lower === f || aliases.includes(f));
     });
   }
   return chains;
@@ -336,6 +337,10 @@ async function main() {
   const appConfig = loadConfig();
   const whitelist = appConfig.whitelist;
 
+  // Use config.env CHAINS as fallback if --chains not specified
+  if (!config.filterChains && appConfig.chains) {
+    config.filterChains = appConfig.chains;
+  }
   const chains = getActiveChains();
 
   log(`${C.bold}${C.cyan}╔══════════════════════════════════════════════════════╗${C.reset}`);

@@ -8,6 +8,7 @@ const CONFIG_FILE = path.join(__dirname, 'config.env');
 
 function loadConfig() {
   const config = {
+    chains: null,      // null = all chains, or array of filter strings
     whitelist: new Set(),
   };
 
@@ -23,6 +24,10 @@ function loadConfig() {
 
     const key = trimmed.slice(0, eqIdx).trim();
     const val = trimmed.slice(eqIdx + 1).trim();
+
+    if (key === 'CHAINS' && val) {
+      config.chains = val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    }
 
     if (key === 'WHITELIST' && val) {
       const addrs = val.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);

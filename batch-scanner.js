@@ -87,7 +87,8 @@ function getActiveChains() {
   if (config.chains) {
     chains = chains.filter(c => {
       const lower = c.name.toLowerCase();
-      return config.chains.some(f => lower.includes(f));
+      const aliases = (c.aliases || []).map(a => a.toLowerCase());
+      return config.chains.some(f => lower.includes(f) || aliases.includes(f));
     });
   }
   return chains;
@@ -210,9 +211,15 @@ async function scanWalletsAcrossChains(wallets, chains) {
 async function main() {
   parseArgs();
 
-  const chains = getActiveChains();
   const appConfig = loadConfig();
   const whitelist = appConfig.whitelist;
+
+  // Use config.env CHAINS as fallback if --chains not specified
+  if (!config.chains && appConfig.chains) {
+    config.chains = appConfig.chains;
+  }
+
+  const chains = getActiveChains();
   let wallets = config.inputFile
     ? loadAddressesFromFile(config.inputFile)
     : generateWallets(config.count);

@@ -3,7 +3,7 @@
 const CHAINS = [
   // === Ethereum & L2 ===
   { name: 'Ethereum',        chainId: 1,      symbol: 'ETH',  rpc: 'https://eth.llamarpc.com' },
-  { name: 'Arbitrum One',    chainId: 42161,   symbol: 'ETH',  rpc: 'https://arb1.arbitrum.io/rpc' },
+  { name: 'Arbitrum One',    chainId: 42161,   aliases: ['arb', 'arbitrum'],   symbol: 'ETH',  rpc: 'https://arb1.arbitrum.io/rpc' },
   { name: 'Optimism',        chainId: 10,      symbol: 'ETH',  rpc: 'https://mainnet.optimism.io' },
   { name: 'Base',            chainId: 8453,    symbol: 'ETH',  rpc: 'https://mainnet.base.org' },
   { name: 'Linea',           chainId: 59144,   symbol: 'ETH',  rpc: 'https://rpc.linea.build' },
@@ -16,10 +16,10 @@ const CHAINS = [
   { name: 'opBNB',           chainId: 204,     symbol: 'BNB',  rpc: 'https://opbnb-mainnet-rpc.bnbchain.org' },
 
   // === Alternative L1 ===
-  { name: 'Polygon',         chainId: 137,     symbol: 'MATIC',rpc: 'https://polygon-rpc.com' },
-  { name: 'BNB Chain',       chainId: 56,      symbol: 'BNB',  rpc: 'https://bsc-dataseed1.binance.org' },
-  { name: 'Avalanche C-Chain',chainId: 43114,  symbol: 'AVAX', rpc: 'https://api.avax.network/ext/bc/C/rpc' },
-  { name: 'Fantom',          chainId: 250,     symbol: 'FTM',  rpc: 'https://rpc.ftm.tools' },
+  { name: 'Polygon',         chainId: 137,     aliases: ['matic'],     symbol: 'MATIC',rpc: 'https://polygon-rpc.com' },
+  { name: 'BNB Chain',       chainId: 56,      aliases: ['bsc', 'binance'],      symbol: 'BNB',  rpc: 'https://bsc-dataseed1.binance.org' },
+  { name: 'Avalanche C-Chain',chainId: 43114,  aliases: ['avax'],  symbol: 'AVAX', rpc: 'https://api.avax.network/ext/bc/C/rpc' },
+  { name: 'Fantom',          chainId: 250,     aliases: ['ftm'],     symbol: 'FTM',  rpc: 'https://rpc.ftm.tools' },
   { name: 'Cronos',          chainId: 25,      symbol: 'CRO',  rpc: 'https://evm.cronos.org' },
   { name: 'Gnosis Chain',    chainId: 100,     symbol: 'xDAI', rpc: 'https://rpc.gnosischain.com' },
   { name: 'Celo',            chainId: 42220,   symbol: 'CELO', rpc: 'https://forno.celo.org' },
