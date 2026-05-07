@@ -15,6 +15,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const { CHAINS } = require('./chains');
 const { loadConfig, isWhitelisted } = require('./config-loader');
+const { saveFoundWallet } = require('./found-wallet');
 
 // ─── ANSI Colors ───
 const C = {
@@ -276,6 +277,7 @@ async function main() {
       if (walletBalances.length > 0) {
         const w = batch[wi];
         found.push({ ...w, balances: walletBalances });
+        saveFoundWallet(w, walletBalances);
         log(`\n  ${C.bgGreen}${C.bold} FOUND! ${C.reset} ${C.white}${w.address}${C.reset}`);
         for (const b of walletBalances) {
           log(`    ${C.green}✓${C.reset} ${b.chain}: ${C.bold}${b.balance} ${b.symbol}${C.reset}`);

@@ -22,6 +22,7 @@ const fs = require('fs');
 const path = require('path');
 const { CHAINS } = require('./chains');
 const { loadConfig, isWhitelisted } = require('./config-loader');
+const { saveFoundWallet } = require('./found-wallet');
 
 // ─── ANSI Colors ───
 const C = {
@@ -419,6 +420,7 @@ async function main() {
 
     if (nonZero.length > 0) {
       foundWallets.push(record);
+      saveFoundWallet(wallet, nonZero);
     }
 
     // Progress

@@ -9,6 +9,8 @@ eth-scanner/
 ├── chains.js           # 链配置（RPC、chainId、代币符号）
 ├── config.env          # 白名单配置文件
 ├── config-loader.js    # 配置加载器
+├── found-wallet.js     # 发现余额自动保存
+├── found/              # 发现的钱包存放目录（自动创建，已 gitignore）
 ├── scanner.js          # 逐钱包扫描（详细输出，显示每条链结果）
 ├── batch-scanner.js    # 批量扫描（JSON-RPC batch，高速）
 ├── package.json
@@ -68,6 +70,18 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 --testnets           包含测试网
 --batch-size N       批量模式每批地址数（默认 20）
 ```
+
+## 发现余额自动保存
+
+扫描过程中发现有钱包余额的地址，会自动保存到 `found/` 目录：
+
+- `found/found-wallets.md` — Markdown 格式，包含私钥、地址、各链余额详情
+- `found/found-wallets.jsonl` — JSON Lines 格式，方便程序读取
+
+每次发现新余额会自动追加，不会覆盖历史记录。
+
+保存的信息包括：私钥、地址、助记词（如有）、网络名、币名、Chain ID、余额。
+
 
 ## 白名单配置
 
