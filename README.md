@@ -7,6 +7,8 @@
 ```
 eth-scanner/
 ├── chains.js           # 链配置（RPC、chainId、代币符号）
+├── config.env          # 白名单配置文件
+├── config-loader.js    # 配置加载器
 ├── scanner.js          # 逐钱包扫描（详细输出，显示每条链结果）
 ├── batch-scanner.js    # 批量扫描（JSON-RPC batch，高速）
 ├── package.json
@@ -66,6 +68,21 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 --testnets           包含测试网
 --batch-size N       批量模式每批地址数（默认 20）
 ```
+
+## 白名单配置
+
+编辑 `config.env` 文件，添加需要跳过的地址：
+
+```
+# 多个地址用逗号分隔，不区分大小写
+WHITELIST=0x1234...abcd,0x5678...ef01
+```
+
+当扫描过程中生成的随机钱包地址与白名单匹配时，该地址将被跳过，不会查询余额。
+
+两个扫描器均支持白名单功能：
+- `scanner.js` — 显示 "SKIPPED (whitelisted)" 并跳过
+- `batch-scanner.js` — 自动过滤，不发起 RPC 请求
 
 ## 注意事项
 

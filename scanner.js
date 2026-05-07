@@ -21,6 +21,7 @@ const { ethers } = require('ethers');
 const fs = require('fs');
 const path = require('path');
 const { CHAINS } = require('./chains');
+const { loadConfig, isWhitelisted } = require('./config-loader');
 
 // ─── ANSI Colors ───
 const C = {
@@ -331,6 +332,9 @@ async function* generateFromFile(filePath) {
 async function main() {
   parseArgs();
 
+  const appConfig = loadConfig();
+  const whitelist = appConfig.whitelist;
+
   const chains = getActiveChains();
 
   log(`${C.bold}${C.cyan}╔══════════════════════════════════════════════════════╗${C.reset}`);
@@ -355,6 +359,9 @@ async function main() {
     log(`    ${C.dim}• ${c.name} (${c.symbol})${C.reset}`);
   }
 
+  if (whitelist.size > 0) {
+    log(`  ${C.dim}Whitelist:${C.reset}      ${C.white}${whitelist.size} address(es) will be skipped${C.reset}`);
+  }
   log(`\n${'─'.repeat(72)}`);
 
   // Pick generator
@@ -388,6 +395,12 @@ async function main() {
   const startTime = Date.now();
 
   for await (const wallet of generator) {
+    // Skip whitelisted addresses
+    if (isWhitelisted(wallet.address, whitelist)) {
+      log(`\n${C.yellow}[${wallet.index + 1}/${totalEstimate}] SKIPPED (whitelisted):${C.reset} ${C.dim}${wallet.address}${C.reset}`);
+      processed++;
+      continue;
+    }
     const results = await checkWallet(wallet.address, wallet.label, chains);
     const nonZero = filterNonZero(results);
 

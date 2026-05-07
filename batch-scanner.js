@@ -14,6 +14,7 @@
 const { ethers } = require('ethers');
 const fs = require('fs');
 const { CHAINS } = require('./chains');
+const { loadConfig, isWhitelisted } = require('./config-loader');
 
 // ─── ANSI Colors ───
 const C = {
@@ -209,9 +210,25 @@ async function main() {
   parseArgs();
 
   const chains = getActiveChains();
-  const wallets = config.inputFile
+  const appConfig = loadConfig();
+  const whitelist = appConfig.whitelist;
+  let wallets = config.inputFile
     ? loadAddressesFromFile(config.inputFile)
     : generateWallets(config.count);
+
+  // Filter out whitelisted addresses
+  const skipped = [];
+  if (whitelist.size > 0) {
+    const filtered = [];
+    for (const w of wallets) {
+      if (isWhitelisted(w.address, whitelist)) {
+        skipped.push(w);
+      } else {
+        filtered.push(w);
+      }
+    }
+    wallets = filtered;
+  }
 
   log(`${C.bold}${C.cyan}════════════════════════════════════════════════${C.reset}`);
   log(`${C.bold}${C.cyan}  EVM Batch Balance Scanner${C.reset}`);
@@ -220,6 +237,9 @@ async function main() {
   log(`  Chains:      ${chains.length}`);
   log(`  Batch size:  ${config.batchSize}`);
   log(`  Concurrency: ${config.concurrency}`);
+  if (skipped.length > 0) {
+    log(`  Whitelist:   ${C.yellow}${skipped.length} address(es) skipped${C.reset}`);
+  }
   log(`  Total RPC:   ${wallets.length * chains.length} calls (${Math.ceil(wallets.length / config.batchSize) * chains.length} batches)`);
   log('');
 
