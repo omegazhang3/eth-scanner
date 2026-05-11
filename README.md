@@ -48,6 +48,59 @@ node batch-scanner.js -n 500 -c eth,bsc,arbitrum,base -o results.json
 | 适用 | 小批量、调试 | 大批量扫描 |
 | 原理 | 逐个 eth_getBalance | JSON-RPC batch |
 
+## 持续运行
+
+使用 `run.sh` 可以持续循环扫描，自动保存日志和结果。
+
+```bash
+# 无限循环扫描（Ctrl+C 停止）
+./run.sh
+
+# 每轮 5000 个钱包，跑 10 轮
+./run.sh 5000 10
+
+# 后台运行
+nohup ./run.sh > /dev/null 2>&1 &
+```
+
+### 脚本参数
+
+```bash
+./run.sh [每轮数量] [总轮次]
+```
+
+- 第一个参数：每轮扫描钱包数量（默认 10000）
+- 第二个参数：总轮次，0 或省略表示无限循环
+
+### 日志与结果
+
+```
+logs/
+├── scan.log      # 所有轮次运行日志（追加写入）
+└── results.json  # 最新一轮扫描结果（覆盖）
+```
+
+```bash
+# 实时查看日志
+tail -f logs/scan.log
+
+# 只看发现有钱包的记录
+grep "发现" logs/scan.log
+```
+
+### 默认配置
+
+run.sh 内置以下优化参数：
+
+| 参数 | 值 | 说明 |
+|------|-----|------|
+| CHAINS | eth,bsc,polygon,arbitrum,base,optimism,avalanche | 7 条主流链 |
+| BATCH_SIZE | 50 | 每批地址数 |
+| CONCURRENCY | 10 | 并行链数 |
+| TIMEOUT | 10000 | RPC 超时 (ms) |
+
+如需修改，直接编辑 `run.sh` 头部变量即可。
+
 ## 支持的链（40+）
 
 Ethereum, Arbitrum, Optimism, Base, Linea, zkSync Era, Scroll, Blast, Mantle,
