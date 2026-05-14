@@ -2,6 +2,45 @@
 
 生成钱包地址，遍历 40+ 条 EVM 兼容链检查余额。
 
+## 扫描流程
+
+```mermaid
+flowchart TD
+    A[开始] --> B[解析命令行参数]
+    B --> C{有 --input 文件?}
+    C -->|是| D[从文件加载地址]
+    C -->|否| E[generateWallets: 生成 N 个随机钱包]
+    D --> F[过滤白名单地址]
+    E --> F
+    F --> G[分成批次, 每批 batch-size 个地址]
+    G --> H{还有下一批?}
+    H -->|是| I[取下一批地址]
+    I --> J[并行查询各链余额]
+    J --> K[batchGetBalances: JSON-RPC batch 请求]
+    K --> L{有余额 > 0?}
+    L -->|是| M[保存到 found/ 目录]
+    L -->|否| N[继续]
+    M --> N
+    N --> H
+    H -->|否| O[输出统计结果]
+    O --> P[结束]
+
+    style A fill:#4CAF50,color:white
+    style P fill:#4CAF50,color:white
+    style E fill:#2196F3,color:white
+    style K fill:#FF9800,color:white
+    style M fill:#9C27B0,color:white
+```
+
+### 关键步骤说明
+
+| 步骤 | 说明 |
+|------|------|
+| `generateWallets()` | 用 ethers.js 的 `Wallet.createRandom()` 生成随机私钥和地址 |
+| `batchGetBalances()` | 将多个地址打包成一个 JSON-RPC batch 请求，一次查询一条链上所有地址的余额 |
+| 并行查询 | 同时对多条链发起请求（默认 10 条链并发） |
+| 分批处理 | 每批 50 个地址 × 9 条链 = 450 个 RPC 调用打包成 9 个 batch 请求 |
+
 ## 项目结构
 
 ```
