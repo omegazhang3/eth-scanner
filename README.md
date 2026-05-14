@@ -1,29 +1,31 @@
+[English](README.md) | [中文](README.zh-CN.md)
+
 # EVM Multi-Chain Wallet Balance Scanner
 
-生成钱包地址，遍历 40+ 条 EVM 兼容链检查余额。
+Generate wallet addresses and check balances across 40+ EVM-compatible chains.
 
-## 扫描流程
+## Scan Flow
 
 ```mermaid
 flowchart TD
-    A[开始] --> B[解析命令行参数]
-    B --> C{有 --input 文件?}
-    C -->|是| D[从文件加载地址]
-    C -->|否| E[generateWallets: 生成 N 个随机钱包]
-    D --> F[过滤白名单地址]
+    A[Start] --> B[Parse command line args]
+    B --> C{Has --input file?}
+    C -->|Yes| D[Load addresses from file]
+    C -->|No| E[generateWallets: Generate N random wallets]
+    D --> F[Filter whitelisted addresses]
     E --> F
-    F --> G[分成批次, 每批 batch-size 个地址]
-    G --> H{还有下一批?}
-    H -->|是| I[取下一批地址]
-    I --> J[并行查询各链余额]
-    J --> K[batchGetBalances: JSON-RPC batch 请求]
-    K --> L{有余额 > 0?}
-    L -->|是| M[保存到 found/ 目录]
-    L -->|否| N[继续]
+    F --> G[Split into batches of batch-size addresses]
+    G --> H{More batches?}
+    H -->|Yes| I[Get next batch]
+    I --> J[Query balances across chains in parallel]
+    J --> K[batchGetBalances: JSON-RPC batch request]
+    K --> L{Balance > 0?}
+    L -->|Yes| M[Save to found/ directory]
+    L -->|No| N[Continue]
     M --> N
     N --> H
-    H -->|否| O[输出统计结果]
-    O --> P[结束]
+    H -->|No| O[Output statistics]
+    O --> P[End]
 
     style A fill:#4CAF50,color:white
     style P fill:#4CAF50,color:white
@@ -32,115 +34,115 @@ flowchart TD
     style M fill:#9C27B0,color:white
 ```
 
-### 关键步骤说明
+### Key Steps
 
-| 步骤 | 说明 |
-|------|------|
-| `generateWallets()` | 用 ethers.js 的 `Wallet.createRandom()` 生成随机私钥和地址 |
-| `batchGetBalances()` | 将多个地址打包成一个 JSON-RPC batch 请求，一次查询一条链上所有地址的余额 |
-| 并行查询 | 同时对多条链发起请求（默认 10 条链并发） |
-| 分批处理 | 每批 50 个地址 × 9 条链 = 450 个 RPC 调用打包成 9 个 batch 请求 |
+| Step | Description |
+|------|-------------|
+| `generateWallets()` | Generate random private keys and addresses using ethers.js `Wallet.createRandom()` |
+| `batchGetBalances()` | Pack multiple addresses into a single JSON-RPC batch request to query all balances on one chain |
+| Parallel query | Query multiple chains simultaneously (default: 10 chains in parallel) |
+| Batch processing | Each batch: 50 addresses × 9 chains = 450 RPC calls packed into 9 batch requests |
 
-## 项目结构
+## Project Structure
 
 ```
 eth-scanner/
-├── chains.js           # 链配置（RPC、chainId、代币符号）
-├── config.env          # 配置文件（白名单 + 网络筛选）
-├── config-loader.js    # 配置加载器
-├── found-wallet.js     # 发现余额自动保存
-├── found/              # 发现的钱包存放目录（自动创建，已 gitignore）
-├── scanner.js          # 逐钱包扫描（详细输出，显示每条链结果）
-├── batch-scanner.js    # 批量扫描（JSON-RPC batch，高速）
+├── chains.js           # Chain config (RPC, chainId, token symbols)
+├── config.env          # Config file (whitelist + network filter)
+├── config-loader.js    # Config loader
+├── found-wallet.js     # Auto-save wallets with balance
+├── found/              # Found wallets directory (auto-created, gitignored)
+├── scanner.js          # Per-wallet scanner (detailed output, shows each chain)
+├── batch-scanner.js    # Batch scanner (JSON-RPC batch, high speed)
 ├── package.json
 └── README.md
 ```
 
-## 快速开始
+## Quick Start
 
 ```bash
 npm install
 
-# 扫描 10 个随机钱包（默认）
+# Scan 10 random wallets (default)
 node scanner.js
 
-# 扫描 100 个随机钱包，只查 ETH/BSC/Polygon
+# Scan 100 random wallets, only check ETH/BSC/Polygon
 node scanner.js random -n 100 -c eth,bsc,polygon
 
-# 扫描 hex range 0x1 到 0xFFFF 的私钥
+# Scan hex range 0x1 to 0xFFFF private keys
 node scanner.js range --start 0x1 --end 0xFFFF
 
-# 从文件读取地址
+# Load addresses from file
 node scanner.js file -i addresses.txt
 
-# 批量模式（高速，适合 100+ 地址）
+# Batch mode (high speed, best for 100+ addresses)
 node batch-scanner.js -n 1000
 node batch-scanner.js -n 500 -c eth,bsc,arbitrum,base -o results.json
 ```
 
-## 两种扫描器对比
+## Scanner Comparison
 
-| 特性 | scanner.js | batch-scanner.js |
-|------|-----------|-----------------|
-| 速度 | ~0.1 wallets/s | ~60+ wallets/s |
-| 输出 | 每条链详细显示 | 只显示有余额的 |
-| 适用 | 小批量、调试 | 大批量扫描 |
-| 原理 | 逐个 eth_getBalance | JSON-RPC batch |
+| Feature | scanner.js | batch-scanner.js |
+|---------|-----------|-----------------|
+| Speed | ~0.1 wallets/s | ~60+ wallets/s |
+| Output | Detailed per-chain display | Only shows balances |
+| Use case | Small batches, debugging | Large batch scanning |
+| Method | Individual eth_getBalance | JSON-RPC batch |
 
-## 持续运行
+## Continuous Scanning
 
-使用 `run.sh` 可以持续循环扫描，自动保存日志和结果。
+Use `run.sh` for continuous loop scanning with automatic logging.
 
 ```bash
-# 无限循环扫描（Ctrl+C 停止）
+# Infinite loop scanning (Ctrl+C to stop)
 ./run.sh
 
-# 每轮 5000 个钱包，跑 10 轮
+# 5000 wallets per round, 10 rounds
 ./run.sh 5000 10
 
-# 后台运行
+# Run in background
 nohup ./run.sh > /dev/null 2>&1 &
 ```
 
-### 脚本参数
+### Script Parameters
 
 ```bash
-./run.sh [每轮数量] [总轮次]
+./run.sh [wallets_per_round] [total_rounds]
 ```
 
-- 第一个参数：每轮扫描钱包数量（默认 10000）
-- 第二个参数：总轮次，0 或省略表示无限循环
+- First parameter: Wallets per round (default: 10000)
+- Second parameter: Total rounds, 0 or omitted for infinite loop
 
-### 日志与结果
+### Logs & Results
 
 ```
 logs/
-├── scan.log      # 所有轮次运行日志（追加写入）
-└── results.json  # 最新一轮扫描结果（覆盖）
+├── scan.log      # All rounds log (appended)
+└── results.json  # Latest round results (overwritten)
 ```
 
 ```bash
-# 实时查看日志
+# Real-time log
 tail -f logs/scan.log
 
-# 只看发现有钱包的记录
-grep "发现" logs/scan.log
+# Only show found wallets
+grep "FOUND" logs/scan.log
 ```
 
-### 默认配置
+### Default Configuration
 
-run.sh 内置以下优化参数：
+`run.sh` has these optimized defaults:
 
-| 参数 | 值 | 说明 |
-|------|-----|------|
-| CHAINS | eth,bsc,polygon,arbitrum,base,optimism,avalanche | 7 条主流链 |
-| BATCH_SIZE | 50 | 每批地址数 |
-| CONCURRENCY | 10 | 并行链数 |
-| TIMEOUT | 10000 | RPC 超时 (ms) |
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| CHAINS | eth,bsc,polygon,arbitrum,base,optimism,avalanche | 7 mainstream chains |
+| BATCH_SIZE | 50 | Addresses per batch |
+| CONCURRENCY | 10 | Parallel chains |
+| TIMEOUT | 10000 | RPC timeout (ms) |
 
-如需修改，直接编辑 `run.sh` 头部变量即可。
+Edit the variables at the top of `run.sh` to customize.
 
-## 支持的链（40+）
+## Supported Chains (40+)
 
 Ethereum, Arbitrum, Optimism, Base, Linea, zkSync Era, Scroll, Blast, Mantle,
 Mode, Zora, opBNB, Polygon, BNB Chain, Avalanche, Fantom, Cronos, Gnosis,
@@ -148,74 +150,74 @@ Celo, Moonbeam, Moonriver, Aurora, Harmony, Klaytn, Meter, Syscoin, Telos,
 WEMIX, EthereumPoW, SmartBCH, Polygon zkEVM, Sei, Taiko, Manta Pacific,
 Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 
-## 参数说明
+## Parameters
 
 ```
--n, --count N        随机生成钱包数量（默认 10）
--c, --chains LIST    逗号分隔的链名筛选（e.g. eth,bsc,polygon）
---start HEX          range 模式起始 hex
---end HEX            range 模式结束 hex
--i, --input FILE     从文件读取地址（每行一个，或 CSV）
--o, --output FILE    结果保存为 JSON
---concurrency N      并行 RPC 数（默认 5）
---timeout MS         单链 RPC 超时（默认 8000ms）
---testnets           包含测试网
---batch-size N       批量模式每批地址数（默认 20）
+-n, --count N        Number of random wallets (default: 10)
+-c, --chains LIST    Comma-separated chain filter (e.g. eth,bsc,polygon)
+--start HEX          Range mode start hex
+--end HEX            Range mode end hex
+-i, --input FILE     Load addresses from file (one per line, or CSV)
+-o, --output FILE    Save results as JSON
+--concurrency N      Parallel RPC count (default: 5)
+--timeout MS         Per-chain RPC timeout (default: 8000ms)
+--testnets           Include testnets
+--batch-size N       Batch mode addresses per batch (default: 20)
 ```
 
-## 配置文件 config.env
+## Config File config.env
 
-所有配置集中在一个文件中，编辑 `config.env`：
+All configuration in one file, edit `config.env`:
 
 ```
-# 网络筛选 — 留空扫描全部，填入则只扫描指定网络
+# Network filter — leave empty to scan all, fill in to scan only specified networks
 CHAINS=eth,bsc,polygon
 
-# 白名单 — 匹配的地址跳过扫描
+# Whitelist — matching addresses are skipped
 WHITELIST=0x1234...abcd,0x5678...ef01
 ```
 
-### 网络筛选
+### Network Filter
 
-`CHAINS` 字段支持部分匹配和别名：
+The `CHAINS` field supports partial matching and aliases:
 
-| 配置 | 实际匹配 |
-|------|----------|
+| Config | Actual Match |
+|--------|--------------|
 | `eth` | Ethereum, EthereumPoW |
 | `bsc` | BNB Chain |
 | `polygon` | Polygon, Polygon zkEVM |
-| `arb` 或 `arbitrum` | Arbitrum One |
+| `arb` or `arbitrum` | Arbitrum One |
 | `avax` | Avalanche |
 | `matic` | Polygon |
 | `ftm` | Fantom |
-| `ethereum` | 仅 Ethereum 主网 |
+| `ethereum` | Ethereum mainnet only |
 
-留空 `CHAINS=` 则扫描全部 40+ 网络。
+Leave `CHAINS=` empty to scan all 40+ networks.
 
-命令行 `--chains` 参数优先级高于 config.env，会覆盖配置文件设置。
+Command line `--chains` parameter has higher priority than config.env.
 
-### 白名单
+### Whitelist
 
-`WHITELIST` 字段配置需要跳过的地址，多个地址用逗号分隔，不区分大小写。
+The `WHITELIST` field configures addresses to skip, comma-separated, case-insensitive.
 
-两个扫描器均支持：
-- `scanner.js` — 显示 "SKIPPED (whitelisted)" 并跳过
-- `batch-scanner.js` — 自动过滤，不发起 RPC 请求
+Both scanners support:
+- `scanner.js` — Shows "SKIPPED (whitelisted)" and skips
+- `batch-scanner.js` — Auto-filters, no RPC requests made
 
-## 发现余额自动保存
+## Auto-Save Found Wallets
 
-扫描过程中发现有钱包余额的地址，会自动保存到 `found/` 目录：
+Wallets with balance are automatically saved to `found/` directory:
 
-- `found/found-wallets.md` — Markdown 格式，包含私钥、地址、各链余额详情
-- `found/found-wallets.jsonl` — JSON Lines 格式，方便程序读取
+- `found/found-wallets.md` — Markdown format with private keys, addresses, chain balances
+- `found/found-wallets.jsonl` — JSON Lines format for programmatic reading
 
-每次发现新余额会自动追加，不会覆盖历史记录。
+Each discovery is appended, never overwriting history.
 
-保存的信息包括：私钥、地址、助记词（如有）、网络名、币名、Chain ID、余额。
+Saved info includes: private key, address, mnemonic (if any), network name, token symbol, Chain ID, balance.
 
-## 注意事项
+## Notes
 
-- 随机私钥找到有余额地址的概率接近于零（2^256 种可能）
-- 部分 RPC 可能因限流返回错误，脚本有自动重试
-- 大量扫描建议用 batch-scanner.js，速度差距巨大
-- 可自行在 chains.js 中添加更多链的 RPC 地址
+- Probability of finding a wallet with balance via random keys is near zero (2^256 possibilities)
+- Some RPCs may return errors due to rate limiting, scripts have auto-retry
+- For large scans, use batch-scanner.js — the speed difference is massive
+- Add more chain RPC addresses in chains.js as needed
