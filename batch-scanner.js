@@ -260,7 +260,9 @@ async function main() {
     const batchNum = Math.floor(b / config.batchSize) + 1;
     const totalBatches = Math.ceil(wallets.length / config.batchSize);
 
-    process.stdout.write(`\r  ${C.cyan}[${batchNum}/${totalBatches}]${C.reset} Scanning batch of ${batch.length} addresses...`);
+    // 每 20 个批次输出换行，确保日志文件有更新
+    const newline = batchNum % 20 === 0 ? '\n' : '';
+    process.stdout.write(`${newline}\r  ${C.cyan}[${batchNum}/${totalBatches}]${C.reset} Scanning batch of ${batch.length} addresses...`);
 
     const chainResults = await scanWalletsAcrossChains(batch, chains);
 
