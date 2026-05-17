@@ -54,6 +54,7 @@ eth-scanner/
 ├── found/              # 发现的钱包存放目录（自动创建，已 gitignore）
 ├── scanner.js          # 逐钱包扫描（详细输出，显示每条链结果）
 ├── batch-scanner.js    # 批量扫描（JSON-RPC batch，高速）
+├── run.sh              # 持续扫描脚本，自动记录日志
 ├── package.json
 └── README.md
 ```
@@ -61,7 +62,7 @@ eth-scanner/
 ## 快速开始
 
 ```bash
-npm install
+pnpm install
 
 # 扫描 10 个随机钱包（默认）
 node scanner.js
@@ -85,7 +86,7 @@ node batch-scanner.js -n 500 -c eth,bsc,arbitrum,base -o results.json
 | 特性 | scanner.js | batch-scanner.js |
 |------|-----------|-----------------|
 | 速度 | ~0.1 wallets/s | ~60+ wallets/s |
-| 输出 | 每条链详细显示 | 只显示有余额的 |
+| 输出 | 每条链详细显示 | 只显示有钱包的地址 |
 | 适用 | 小批量、调试 | 大批量扫描 |
 | 原理 | 逐个 eth_getBalance | JSON-RPC batch |
 
@@ -117,7 +118,7 @@ nohup ./run.sh > /dev/null 2>&1 &
 
 ```
 logs/
-├── scan.log      # 所有轮次运行日志（追加写入）
+├── scan.log      # 所有轮次运行日志（追加写入，已过滤 \r）
 └── results.json  # 最新一轮扫描结果（覆盖）
 ```
 
@@ -126,7 +127,19 @@ logs/
 tail -f logs/scan.log
 
 # 只看发现有钱包的记录
-grep "发现" logs/scan.log
+grep "FOUND" logs/scan.log
+```
+
+### 进度显示
+
+扫描器在进度输出中显示当前轮次：
+
+```
+[R1] [1/200] Scanning batch of 50 addresses...
+[R1] [20/200] Scanning batch of 50 addresses...
+[R1] SCAN COMPLETE
+  Wallets scanned: 10000
+  Found with balance: 0
 ```
 
 ### 默认配置
@@ -163,6 +176,7 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 --timeout MS         单链 RPC 超时（默认 8000ms）
 --testnets           包含测试网
 --batch-size N       批量模式每批地址数（默认 20）
+--round N            当前轮次（用于日志显示）
 ```
 
 ## 配置文件 config.env
@@ -221,3 +235,4 @@ WHITELIST=0x1234...abcd,0x5678...ef01
 - 部分 RPC 可能因限流返回错误，脚本有自动重试
 - 大量扫描建议用 batch-scanner.js，速度差距巨大
 - 可自行在 chains.js 中添加更多链的 RPC 地址
+- 余额为 0 的钱包不会保存，只显示扫描进度

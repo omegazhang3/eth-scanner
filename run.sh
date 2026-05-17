@@ -45,7 +45,7 @@ while true; do
     echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo "📦 第 $total_rounds 轮开始 $(date '+%H:%M:%S')"
 
-    # 运行扫描器
+    # 运行扫描器，传入轮次参数
     cd "$SCRIPT_DIR"
     node batch-scanner.js \
         -n "$COUNT" \
@@ -53,8 +53,9 @@ while true; do
         --batch-size "$BATCH_SIZE" \
         --concurrency "$CONCURRENCY" \
         --timeout "$TIMEOUT" \
+        --round "$total_rounds" \
         -o "$RESULT_FILE" \
-        2>&1 | tee -a "$LOG_FILE"
+        2>&1 | sed 's/\r//' | grep -v '^\s*$' | tee -a "$LOG_FILE"
 
     exit_code=${PIPESTATUS[0]}
 

@@ -54,6 +54,7 @@ eth-scanner/
 ├── found/              # Found wallets directory (auto-created, gitignored)
 ├── scanner.js          # Per-wallet scanner (detailed output, shows each chain)
 ├── batch-scanner.js    # Batch scanner (JSON-RPC batch, high speed)
+├── run.sh              # Continuous scanning script with logging
 ├── package.json
 └── README.md
 ```
@@ -61,7 +62,7 @@ eth-scanner/
 ## Quick Start
 
 ```bash
-npm install
+pnpm install
 
 # Scan 10 random wallets (default)
 node scanner.js
@@ -85,7 +86,7 @@ node batch-scanner.js -n 500 -c eth,bsc,arbitrum,base -o results.json
 | Feature | scanner.js | batch-scanner.js |
 |---------|-----------|-----------------|
 | Speed | ~0.1 wallets/s | ~60+ wallets/s |
-| Output | Detailed per-chain display | Only shows balances |
+| Output | Detailed per-chain display | Only shows wallets with balance |
 | Use case | Small batches, debugging | Large batch scanning |
 | Method | Individual eth_getBalance | JSON-RPC batch |
 
@@ -117,7 +118,7 @@ nohup ./run.sh > /dev/null 2>&1 &
 
 ```
 logs/
-├── scan.log      # All rounds log (appended)
+├── scan.log      # All rounds log (appended, \r filtered)
 └── results.json  # Latest round results (overwritten)
 ```
 
@@ -127,6 +128,18 @@ tail -f logs/scan.log
 
 # Only show found wallets
 grep "FOUND" logs/scan.log
+```
+
+### Progress Display
+
+The scanner shows the current round number in progress output:
+
+```
+[R1] [1/200] Scanning batch of 50 addresses...
+[R1] [20/200] Scanning batch of 50 addresses...
+[R1] SCAN COMPLETE
+  Wallets scanned: 10000
+  Found with balance: 0
 ```
 
 ### Default Configuration
@@ -163,6 +176,7 @@ Gravity, WorldChain, Abstract, Soneium, Ink, Unichain, Corn + testnets
 --timeout MS         Per-chain RPC timeout (default: 8000ms)
 --testnets           Include testnets
 --batch-size N       Batch mode addresses per batch (default: 20)
+--round N            Current round number (for display in logs)
 ```
 
 ## Config File config.env
@@ -221,3 +235,4 @@ Saved info includes: private key, address, mnemonic (if any), network name, toke
 - Some RPCs may return errors due to rate limiting, scripts have auto-retry
 - For large scans, use batch-scanner.js — the speed difference is massive
 - Add more chain RPC addresses in chains.js as needed
+- Only wallets with balance > 0 are saved; zero-balance wallets are skipped silently

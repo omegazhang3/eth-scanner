@@ -35,6 +35,7 @@ const config = {
   inputFile: null,
   outputFile: 'batch-results.json',
   batchSize: 20,       // addresses per batch RPC call
+  round: 0,            // 当前轮次（用于显示）
 };
 
 // ─── Parse Args ───
@@ -66,6 +67,9 @@ function parseArgs() {
       case '--timeout':
         config.timeout = parseInt(args[++i], 10);
         break;
+      case '--round':
+        config.round = parseInt(args[++i], 10);
+        break;
       case '-h': case '--help':
         log(`Usage: node batch-scanner.js [options]
   -n, --count N        Number of random wallets (default: 100)
@@ -75,6 +79,7 @@ function parseArgs() {
   --batch-size N       RPC batch size (default: 20)
   --concurrency N      Parallel chains (default: 5)
   --timeout MS         RPC timeout (default: 10000)
+  --round N            Current round number (for display)
   --testnets           Include testnets`);
         process.exit(0);
     }
@@ -238,8 +243,10 @@ async function main() {
     wallets = filtered;
   }
 
+  const roundPrefix = config.round > 0 ? `[R${config.round}] ` : '';
+
   log(`${C.bold}${C.cyan}════════════════════════════════════════════════${C.reset}`);
-  log(`${C.bold}${C.cyan}  EVM Batch Balance Scanner${C.reset}`);
+  log(`${C.bold}${C.cyan}  ${roundPrefix}EVM Batch Balance Scanner${C.reset}`);
   log(`${C.bold}${C.cyan}════════════════════════════════════════════════${C.reset}`);
   log(`  Wallets:     ${wallets.length}`);
   log(`  Chains:      ${chains.length}`);
@@ -262,7 +269,7 @@ async function main() {
 
     // 每 20 个批次输出换行，确保日志文件有更新
     const newline = batchNum % 20 === 0 ? '\n' : '';
-    process.stdout.write(`${newline}\r  ${C.cyan}[${batchNum}/${totalBatches}]${C.reset} Scanning batch of ${batch.length} addresses...`);
+    process.stdout.write(`${newline}\r  ${C.cyan}${roundPrefix}[${batchNum}/${totalBatches}]${C.reset} Scanning batch of ${batch.length} addresses...`);
 
     const chainResults = await scanWalletsAcrossChains(batch, chains);
 
@@ -298,7 +305,7 @@ async function main() {
   const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
 
   log(`\n\n${'═'.repeat(72)}`);
-  log(`${C.bold}${C.cyan}SCAN COMPLETE${C.reset}`);
+  log(`${C.bold}${C.cyan}${roundPrefix}SCAN COMPLETE${C.reset}`);
   log(`  Wallets scanned:   ${wallets.length}`);
   log(`  Chains checked:    ${chains.length}`);
   log(`  Time:              ${elapsed}s`);
