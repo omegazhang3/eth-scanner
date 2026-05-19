@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>☕ Support ETH Scanner</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0d1117;
+    color: #e6edf3;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+  }
+  .header {
+    margin-bottom: 24px;
+  }
+  .header h1 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .header p {
+    color: #8b949e;
+    font-size: 14px;
+  }
+  .chain-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .chain-btn {
+    background: #161b22;
+    border: 2px solid #30363d;
+    border-radius: 10px;
+    padding: 10px 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #e6edf3;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .chain-btn:hover { border-color: #58a6ff; }
+  .chain-btn.active {
+    border-color: #58a6ff;
+    background: #1f2937;
+    box-shadow: 0 0 12px rgba(88,166,255,0.3);
+  }
+  .chain-btn .icon { font-size: 20px; display: block; margin-bottom: 4px; }
+  .qr-card {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  #qrcode {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+  #qrcode canvas, #qrcode img {
+    border-radius: 8px;
+  }
+  .chain-label {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #58a6ff;
+  }
+  .addr-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    word-break: break-all;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 13px;
+    color: #8b949e;
+    text-align: left;
+  }
+  .copy-btn {
+    width: 100%;
+    padding: 12px;
+    background: #238636;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .copy-btn:hover { background: #2ea043; }
+  .copy-btn.copied { background: #1f6feb; }
+  .footer {
+    margin-top: 24px;
+    color: #484f58;
+    font-size: 12px;
+  }
+  .footer a { color: #58a6ff; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>☕ Buy Me a Coffee</h1>
+    <p>Support the ETH Scanner project</p>
+  </div>
+
+  <div class="chain-grid" id="chainGrid"></div>
+
+  <div class="qr-card">
+    <div class="chain-label" id="chainLabel">BTC</div>
+    <div id="qrcode"></div>
+    <div class="addr-box" id="addrBox"></div>
+    <button class="copy-btn" id="copyBtn" onclick="copyAddr()">📋 Copy Address</button>
+  </div>
+
+  <div class="footer">
+    <a href="https://github.com/omegazhang3/eth-scanner">← Back to ETH Scanner</a>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.4/build/qrcode.min.js"></script>
+<script>
+const chains = [
+  { id: 'BTC',  icon: '₿', addr: 'bc1qylppe0cl43k0gnvx4cpulh02vkuhg4pktklvfq' },
+  { id: 'ETH',  icon: 'Ξ', addr: '0x1162d48d78a1b15e16e299797ccc981f10ea6470' },
+  { id: 'BNB',  icon: '◆', addr: '0x1162d48d78a1b15e16e299797ccc981f10ea6470' },
+  { id: 'SOL',  icon: '◎', addr: '3qbScdEG6MVJVDMZpvnikAdMJWciusr1Y1k7crtnaU18' },
+  { id: 'TRX',  icon: 'T', addr: 'TLWcf5F6vjJYvDCQxfd9wk2TnSENHFxpPm' },
+  { id: 'TON',  icon: '💎', addr: 'UQDD6jwcvn060MEtOFcR1Dr_QDIj96XKTYcP-fHziy25wPbv' },
+  { id: 'SUI',  icon: '🌊', addr: '0x1b34f20157924b5ccf01ad279d31ef8951d2f505a8660947ba6f7e857f0c60d0' },
+  { id: 'ATOM', icon: '⚛', addr: 'cosmos1xaw7aesczr5gkh8dx06z547cqt6atc7he7nyhl' },
+  { id: 'APT',  icon: '🔺', addr: '0x0107ddb4b2ab19b965e60459a63715d7fc026724408990b567ed84402069cc71' },
+  { id: 'OKB',  icon: '✦', addr: 'XKO1162d48d78a1b15e16e299797ccc981f10ea6470' },
+];
+
+let current = 0;
+
+function renderGrid() {
+  const grid = document.getElementById('chainGrid');
+  grid.innerHTML = chains.map((c, i) =>
+    `<div class="chain-btn ${i === current ? 'active' : ''}" onclick="select(${i})">
+      <span class="icon">${c.icon}</span>${c.id}
+    </div>`
+  ).join('');
+}
+
+function renderQR() {
+  const c = chains[current];
+  document.getElementById('chainLabel').textContent = c.id + ' Network';
+  document.getElementById('addrBox').textContent = c.addr;
+  const qrEl = document.getElementById('qrcode');
+  qrEl.innerHTML = '';
+  QRCode.toCanvas(c.addr, {
+    width: 220,
+    margin: 2,
+    color: { dark: '#e6edf3', light: '#161b22' },
+  }, (err, canvas) => {
+    if (!err) qrEl.appendChild(canvas);
+  });
+  const btn = document.getElementById('copyBtn');
+  btn.textContent = '📋 Copy Address';
+  btn.classList.remove('copied');
+}
+
+function select(i) {
+  current = i;
+  renderGrid();
+  renderQR();
+}
+
+function copyAddr() {
+  navigator.clipboard.writeText(chains[current].addr).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✅ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 Copy Address';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+renderGrid();
+renderQR();
+</script>
+</body>
+</html>
