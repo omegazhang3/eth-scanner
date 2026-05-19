@@ -236,3 +236,42 @@ Saved info includes: private key, address, mnemonic (if any), network name, toke
 - For large scans, use batch-scanner.js — the speed difference is massive
 - Add more chain RPC addresses in chains.js as needed
 - Only wallets with balance > 0 are saved; zero-balance wallets are skipped silently
+
+## ☕ Support the Project
+
+If you find this project useful, consider buying me a coffee! Scan any QR code below or copy the address.
+
+<table>
+<tr>
+<td align="center"><img src="assets/qrcodes/btc.png" width="130"><br><b>BTC</b><br><code>bc1qylppe...klvfq</code></td>
+<td align="center"><img src="assets/qrcodes/eth.png" width="130"><br><b>ETH</b><br><code>0x1162d4...ea6470</code></td>
+<td align="center"><img src="assets/qrcodes/bnb.png" width="130"><br><b>BSC/BNB</b><br><code>0x1162d4...ea6470</code></td>
+<td align="center"><img src="assets/qrcodes/sol.png" width="130"><br><b>SOL</b><br><code>3qbScdEG...rnaU18</code></td>
+<td align="center"><img src="assets/qrcodes/trx.png" width="130"><br><b>TRX</b><br><code>TLWcf5F6...xpPm</code></td>
+</tr>
+<tr>
+<td align="center"><img src="assets/qrcodes/ton.png" width="130"><br><b>TON</b><br><code>UQDD6jw...5wPbv</code></td>
+<td align="center"><img src="assets/qrcodes/sui.png" width="130"><br><b>SUI</b><br><code>0x1b34f2...c60d0</code></td>
+<td align="center"><img src="assets/qrcodes/atom.png" width="130"><br><b>ATOM</b><br><code>cosmos1xa...7nyhl</code></td>
+<td align="center"><img src="assets/qrcodes/apt.png" width="130"><br><b>APT</b><br><code>0x0107dd...9cc71</code></td>
+<td align="center"><img src="assets/qrcodes/okb.png" width="130"><br><b>OKB</b><br><code>XKO1162...ea6470</code></td>
+</tr>
+</table>
+
+<details>
+<summary>📋 Full Addresses (click to expand)</summary>
+
+| Chain | Address |
+|-------|---------|
+| BTC | `bc1qylppe0cl43k0gnvx4cpulh02vkuhg4pktklvfq` |
+| ETH | `0x1162d48d78a1b15e16e299797ccc981f10ea6470` |
+| BSC/BNB | `0x1162d48d78a1b15e16e299797ccc981f10ea6470` |
+| SOL | `3qbScdEG6MVJVDMZpvnikAdMJWciusr1Y1k7crtnaU18` |
+| TRX | `TLWcf5F6vjJYvDCQxfd9wk2TnSENHFxpPm` |
+| TON | `UQDD6jwcvn060MEtOFcR1Dr_QDIj96XKTYcP-fHziy25wPbv` |
+| SUI | `0x1b34f20157924b5ccf01ad279d31ef8951d2f505a8660947ba6f7e857f0c60d0` |
+| ATOM | `cosmos1xaw7aesczr5gkh8dx06z547cqt6atc7he7nyhl` |
+| APT | `0x0107ddb4b2ab19b965e60459a63715d7fc026724408990b567ed84402069cc71` |
+| OKB | `XKO1162d48d78a1b15e16e299797ccc981f10ea6470` |
+
+</details>
