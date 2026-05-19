@@ -241,10 +241,4 @@ Saved info includes: private key, address, mnemonic (if any), network name, toke
 
 If you find this project useful, consider buying me a coffee!
 
-<p align="center">
-  <img src="assets/qrcodes/donate.png" width="180" alt="Donate QR Code">
-  <br>
-  <b>Scan to donate</b> — BTC, ETH, SOL, TON, TRX, SUI, ATOM, APT, OKB
-  <br>
-  <a href="https://omegazhang3.github.io/eth-scanner/donate">👉 Open donation page</a>
-</p>
+**EVM address (all EVM chains):** `0x1162d48d78a1b15e16e299797ccc981f10ea6470`

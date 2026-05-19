@@ -241,10 +241,4 @@ WHITELIST=0x1234...abcd,0x5678...ef01
 
 如果觉得这个项目有用，请作者喝杯咖啡！
 
-<p align="center">
-  <img src="assets/qrcodes/donate.png" width="180" alt="捐赠二维码">
-  <br>
-  <b>扫码捐赠</b> — BTC、ETH、SOL、TON、TRX、SUI、ATOM、APT、OKB
-  <br>
-  <a href="https://omegazhang3.github.io/eth-scanner/donate">👉 打开捐赠页面</a>
-</p>
+**EVM 地址（所有 EVM 链通用）：** `0x1162d48d78a1b15e16e299797ccc981f10ea6470`
